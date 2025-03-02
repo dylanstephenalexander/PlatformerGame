@@ -7,12 +7,12 @@ public class InputManager : MonoBehaviour
     public UnityEvent OnSpacePressed = new UnityEvent();
     public UnityEvent OnSpaceReleased = new UnityEvent();
     public UnityEvent OnResetPressed = new UnityEvent();
+    public UnityEvent OnDashPressed = new UnityEvent();
 
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.Space)){
             OnSpacePressed?.Invoke();
-            Debug.Log("space pressed");
         }
         if(Input.GetKeyUp(KeyCode.Space)){
             OnSpaceReleased?.Invoke();
@@ -36,6 +36,10 @@ public class InputManager : MonoBehaviour
         
         if(Input.GetKeyDown(KeyCode.R)){
             OnResetPressed?.Invoke();
+        }
+
+        if(Input.GetKeyDown(KeyCode.E)){
+            OnDashPressed?.Invoke();
         }
     }
 }

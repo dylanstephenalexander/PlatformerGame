@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,13 +12,24 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool canDoubleJump;
     [SerializeField] private Vector3 velocity;
     [SerializeField] private Vector3 moveDirection;
+    [SerializeField] private bool canDash;
+    [SerializeField] private bool isDashing;
+    [SerializeField] private float dashSpeed = 30f;
+    [SerializeField] private float dashTime = 0.2f;
+    [SerializeField] private float dashCoolDown = 1f;
     void Start()
     {
         charController = GetComponent<CharacterController>();
         inputManager.OnMove.AddListener(MovePlayer);
         inputManager.OnSpacePressed.AddListener(Jump);
+        inputManager.OnDashPressed.AddListener(PerformDash);
+        canDash = true;
     }
     void Update(){
+        if(isDashing){
+            charController.Move(velocity * Time.deltaTime);
+            return;
+        }
         touchingGround = charController.isGrounded;
         if(!touchingGround){
             velocity.y -= gravity *Time.deltaTime;
@@ -26,11 +38,9 @@ public class PlayerController : MonoBehaviour
         charController.Move(calculatedMove*Time.deltaTime);
     }
     private void MovePlayer(Vector3 direction){
-        Debug.Log("move player called " + transform.position);
         moveDirection = new(direction.x, 0, direction.z);
     }
     private void Jump(){
-        Debug.Log("jump method called");
         if(touchingGround){
             velocity.y = jumpForce; 
             canDoubleJump = true;
@@ -39,6 +49,25 @@ public class PlayerController : MonoBehaviour
             velocity.y += jumpForce * 0.5f;
             canDoubleJump = false;
         }
+    }
+    private void PerformDash(){
+        if(!canDash){
+            return;
+        }
+        else {
+            StartCoroutine(Dash());
+        }
+    }
 
+    private IEnumerator Dash(){
+        canDash = false;
+        isDashing = true;
+        gravity = 0f; //suspend player in air
+        velocity = moveDirection * dashSpeed; //enhance velocity while dashing
+        yield return new WaitForSeconds(dashTime); //timer for dash. While dashing, the enhanced velocity is used to move the player in the update() method
+        gravity = 20f; //end dash and readjust parameters for normal movement
+        isDashing = false;
+        yield return new WaitForSeconds(dashCoolDown);
+        canDash = true;
     }
 }
