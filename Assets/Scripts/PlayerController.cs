@@ -4,6 +4,7 @@ using System.Collections;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private InputManager inputManager;
+    [SerializeField] private Transform cameraTransform;
     [SerializeField] private float movementSpeed = 7f;
     [SerializeField] private float jumpForce = 7f;
     [SerializeField] private float gravity = 20f;
@@ -38,7 +39,13 @@ public class PlayerController : MonoBehaviour
         charController.Move(calculatedMove*Time.deltaTime);
     }
     private void MovePlayer(Vector3 direction){
-        moveDirection = new(direction.x, 0, direction.z);
+        Vector3 cameraForward = cameraTransform.forward;
+        Vector3 cameraRight = cameraTransform.right;
+        cameraForward.y = 0;
+        cameraRight.y = 0;
+        cameraForward.Normalize();
+        cameraRight.Normalize();
+        moveDirection = (cameraForward * direction.z + cameraRight * direction.x).normalized;
     }
     private void Jump(){
         if(touchingGround){
